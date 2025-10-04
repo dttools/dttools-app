@@ -1,5 +1,7 @@
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { Link } from 'wouter'
+import { HelpCircle, Settings, User, LogOut } from 'lucide-react'
 
 export function DashboardPage() {
   const { user, logout } = useAuth()
@@ -10,15 +12,42 @@ export function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold">Design Thinking Tools</h1>
+              <Link href="/">
+                <h1 className="text-xl font-semibold cursor-pointer hover:text-blue-600">
+                  Design Thinking Tools
+                </h1>
+              </Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <span>Welcome, {user?.name || user?.username}</span>
+            <div className="flex items-center space-x-6">
+              <Link href="/help">
+                <a className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors">
+                  <HelpCircle className="h-5 w-5" />
+                  <span>Ajuda</span>
+                </a>
+              </Link>
+              
+              {user?.role === 'admin' && (
+                <Link href="/admin/help">
+                  <a className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors">
+                    <Settings className="h-5 w-5" />
+                    <span>Admin</span>
+                  </a>
+                </Link>
+              )}
+              
+              <Link href="/profile">
+                <a className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors">
+                  <User className="h-5 w-5" />
+                  <span>{user?.name || user?.username}</span>
+                </a>
+              </Link>
+              
               <button
                 onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="flex items-center space-x-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
               >
-                Logout
+                <LogOut className="h-4 w-4" />
+                <span>Sair</span>
               </button>
             </div>
           </div>

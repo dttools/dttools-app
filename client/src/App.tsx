@@ -11,6 +11,8 @@ import { ProjectPage } from '@/pages/ProjectPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { SubscriptionPage } from '@/pages/SubscriptionPage'
 import { LibraryPage } from '@/pages/LibraryPage'
+import { HelpPage } from '@/pages/HelpPage'
+import { AdminHelpPage } from '@/pages/AdminHelpPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 const queryClient = new QueryClient({
@@ -56,6 +58,14 @@ function App() {
               <Route path="/library">
                 <ProtectedRoute>
                   <LibraryPage />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/help">
+                <HelpPage />
+              </Route>
+              <Route path="/admin/help">
+                <ProtectedRoute>
+                  <AdminHelpPage />
                 </ProtectedRoute>
               </Route>
             </Switch>
