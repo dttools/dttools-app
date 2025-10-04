@@ -29,6 +29,7 @@ import {
   getSubscriptionInfo 
 } from "./subscriptionMiddleware";
 import { designThinkingAI, type ChatMessage, type DesignThinkingContext } from "./aiService";
+import { helpRoutes } from "./helpRoutes";
 
 // Initialize Stripe with secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
@@ -77,6 +78,9 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Help/Wiki routes
+  app.use("/api/help", helpRoutes);
+
   // Subscription info endpoint
   app.get("/api/subscription-info", requireAuth, getSubscriptionInfo);
 

@@ -255,6 +255,48 @@ export const articles = pgTable("articles", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+// Help/Wiki System
+export const helpCategories = pgTable("help_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  icon: text("icon"), // Lucide icon name
+  order: integer("order").default(0),
+  published: boolean("published").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const helpArticles = pgTable("help_articles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(),
+  excerpt: text("excerpt"),
+  categoryId: varchar("category_id").references(() => helpCategories.id),
+  author: text("author").notNull(),
+  tags: jsonb("tags").default([]), // Array of tags
+  order: integer("order").default(0),
+  published: boolean("published").default(true),
+  featured: boolean("featured").default(false),
+  views: integer("views").default(0),
+  helpful: integer("helpful").default(0), // helpful votes
+  notHelpful: integer("not_helpful").default(0), // not helpful votes
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const helpFeedback = pgTable("help_feedback", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  articleId: varchar("article_id").references(() => helpArticles.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  type: text("type").notNull(), // helpful, not_helpful, suggestion
+  comment: text("comment"),
+  email: text("email"), // for anonymous feedback
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 // Insert schemas
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
@@ -342,6 +384,23 @@ export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions
   updatedAt: true,
 });
 
+export const insertHelpCategorySchema = createInsertSchema(helpCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertHelpArticleSchema = createInsertSchema(helpArticles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertHelpFeedbackSchema = createInsertSchema(helpFeedback).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Profile update schema - excludes sensitive fields
 export const updateProfileSchema = createInsertSchema(users).omit({
   id: true,
@@ -422,6 +481,15 @@ export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema
 
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
 export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
+
+export type HelpCategory = typeof helpCategories.$inferSelect;
+export type InsertHelpCategory = z.infer<typeof insertHelpCategorySchema>;
+
+export type HelpArticle = typeof helpArticles.$inferSelect;
+export type InsertHelpArticle = z.infer<typeof insertHelpArticleSchema>;
+
+export type HelpFeedback = typeof helpFeedback.$inferSelect;
+export type InsertHelpFeedback = z.infer<typeof insertHelpFeedbackSchema>;
 
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 
