@@ -147,6 +147,38 @@ O servidor estará disponível em `http://localhost:5000`
 - `npm run check` - Verificar tipos TypeScript
 - `npm run db:push` - Executar migrações do banco
 
+## 🚀 Deploy
+
+### Deploy Rápido (Docker)
+
+```bash
+# Configurar ambiente de produção
+./setup-production.sh
+
+# Configurar variáveis de ambiente
+cp .env.production .env.production.local
+# Editar .env.production.local com suas configurações
+
+# Fazer deploy
+./deploy.sh
+```
+
+### Teste Local
+
+```bash
+# Testar deploy localmente
+./test-deploy.sh
+```
+
+### Plataformas Cloud
+
+- **Railway:** Conecte o repositório e configure as variáveis
+- **Render:** Use o arquivo `render.yaml` incluído
+- **Vercel:** Use o arquivo `vercel.json` incluído
+- **DigitalOcean:** Deploy como Docker app
+
+📖 **Guia completo:** Veja [DEPLOY.md](DEPLOY.md) para instruções detalhadas.
+
 ## 📝 Funcionalidades por Implementar
 
 ### Fase 1: Empatizar
