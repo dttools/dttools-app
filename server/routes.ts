@@ -1112,6 +1112,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  import express from "express";
+  // ...demais imports
+
   // Stripe webhook to handle subscription events
   app.post("/api/stripe-webhook", async (req, res) => {
     const sig = req.headers["stripe-signature"];
