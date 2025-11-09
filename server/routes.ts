@@ -1116,72 +1116,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
 // ...demais imports
 
   // Stripe webhook to handle subscription events
-  const expressModule = await import("express");
-  const expressRaw =
-    (expressModule as any).raw ||
-    (expressModule.default && (expressModule.default as any).raw);
+     const expressModule = await import("express");
+   const expressRaw =
+     (expressModule as any).raw ||
+     (expressModule.default && (expressModule.default as any).raw);
 
-  if (!expressRaw) {
-    throw new Error("Failed to load express raw body parser");
-  }
+   if (!expressRaw) {
+     throw new Error("Failed to load express raw body parser");
+   }
 
-  app.post(
-    "/api/stripe-webhook",
-    expressRaw({ type: "application/json" }),
-    async (req, res) => {
-      const sig = req.headers["stripe-signature"];
-      let event;
+   app.post(
+     "/api/stripe-webhook",
+     expressRaw({ type: "application/json" }),
+     async (req, res) => {
+       const sig = req.headers["stripe-signature"];
+       let event;
 
-      try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          sig ?? "",
-          process.env.STRIPE_WEBHOOK_SECRET ?? ""
-        );
-      } catch (err: any) {
-        console.log("Webhook signature verification failed.", err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-      }
+       try {
+         event = stripe.webhooks.constructEvent(
+           req.body,
+           sig ?? "",
+           process.env.STRIPE_WEBHOOK_SECRET ?? ""
+         );
+       } catch (err: any) {
+         console.log("Webhook signature verification failed.", err.message);
+         return res.status(400).send(`Webhook Error: ${err.message}`);
+       }
 
-      try {
-        switch (event.type) {
-          case "checkout.session.completed": {
-            const session = event.data.object as Stripe.Checkout.Session;
-            if (session.metadata) {
-              const { userId, planId, billingPeriod } = session.metadata;
+       try {
+         switch (event.type) {
+           case "checkout.session.completed": {
+             const session = event.data.object as Stripe.Checkout.Session;
+             if (session.metadata) {
+               const { userId, planId, billingPeriod } = session.metadata;
 
-              await storage.createUserSubscription({
-                userId,
-                planId,
-                stripeSubscriptionId: session.subscription as string,
-                status: "active",
-                billingPeriod: billingPeriod as "monthly" | "yearly",
-                currentPeriodStart: new Date(),
-                currentPeriodEnd: new Date(
-                  Date.now() +
-                    (billingPeriod === "yearly" ? 365 : 30) *
-                      24 *
-                      60 *
-                      60 *
-                      1000
-                ),
-              });
+               await storage.createUserSubscription({
+                 userId,
+                 planId,
+                 stripeSubscriptionId: session.subscription as string,
+                 status: "active",
+                 billingPeriod: billingPeriod as "monthly" | "yearly",
+                 currentPeriodStart: new Date(),
+                 currentPeriodEnd: new Date(
+                   Date.now() +
+                     (billingPeriod === "yearly" ? 365 : 30) *
+                       24 *
+                       60 *
+                       60 *
+                       1000
+                 ),
+               });
 
-              // ... aqui você mantém os demais updates do bloco original
-            }
-            break;
-          }
+               // mantenha os demais updates do bloco original aqui
+             }
+             break;
+           }
 
-          // mantenha os demais cases exatamente como estavam
-        }
+           // mantenha os demais cases exatamente como estão
+         }
 
-        res.json({ received: true });
-      } catch (error) {
-        console.error("Error processing webhook:", error);
-        res.status(500).json({ error: "Webhook processing failed" });
-      }
-    }
-  );
+         res.json({ received: true });
+       } catch (error) {
+         console.error("Error processing webhook:", error);
+         res.status(500).json({ error: "Webhook processing failed" });
+       }
+     }
+   );
 
         // ...demais cases
       }
