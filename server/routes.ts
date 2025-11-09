@@ -30,10 +30,12 @@ import {
 } from "./subscriptionMiddleware";
 import { designThinkingAI, type ChatMessage, type DesignThinkingContext } from "./aiService";
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-08-27.basil",
-});
+// Initialize Stripe with secret key (optional)
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-08-27.basil",
+    })
+  : null;
 
 // Extend Request interface to include session user
 declare module 'express-serve-static-core' {
@@ -77,6 +79,15 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.status(200).json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || "1.0.0"
+    });
+  });
+
   // Subscription info endpoint
   app.get("/api/subscription-info", requireAuth, getSubscriptionInfo);
 
@@ -1027,6 +1038,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create Stripe Checkout Session
   app.post("/api/create-checkout-session", requireAuth, async (req, res) => {
     try {
+      if (!stripe) {
+        return res.status(503).json({ error: "Payment system not configured" });
+      }
+
       if (!req.user?.id) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -1220,6 +1235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cancel subscription
   app.post("/api/cancel-subscription", requireAuth, async (req, res) => {
     try {
+      if (!stripe) {
+        return res.status(503).json({ error: "Payment system not configured" });
+      }
+
       if (!req.user?.id) {
         return res.status(401).json({ error: "User not authenticated" });
       }
